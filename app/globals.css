@@ -8,8 +8,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-switzer);
+  --font-serif: var(--font-instrument-serif);
+  --breakpoint-md: 810px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +20,390 @@
   }
 }
 
+/* Hide the page scrollbar (scrolling still works) */
+html {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Lenis smooth scroll (from lenis/dist/lenis.css, MIT) */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch],
+.lenis [data-lenis-prevent-vertical],
+.lenis [data-lenis-prevent-horizontal] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+.lenis.lenis-autoToggle {
+  transition-property: overflow;
+  transition-duration: 1ms;
+  transition-behavior: allow-discrete;
+}
+
+/* Entrance animations — timings match the original Framer site.
+   Delays assume the intro panel plays first (see Intro.tsx). */
+@keyframes rise-in {
+  from {
+    transform: translateY(var(--rise, 130px)) rotate(2deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drop-in {
+  from {
+    transform: translateY(-85px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes word-in {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+
+/* The original collapses the panel's top/height (0 / 104vh → -30px / 1vh). Animating layout like that
+   counts as a layout shift (it was ~0.2 CLS), so the same bottom-edge motion is done with a clip,
+   and the centred text rides up with a transform exactly as it did inside the shrinking panel. */
+@keyframes intro-collapse {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 calc(103vh + 30px) 0);
+  }
+}
+
+@keyframes intro-text-rise {
+  to {
+    transform: translateY(calc(-51.5vh - 30px));
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes hide {
+  to {
+    visibility: hidden;
+  }
+}
+
+.hero-line {
+  transform-origin: 25% 50%;
+  animation: rise-in 1s cubic-bezier(0.12, 0.23, 0.5, 1) backwards;
+}
+
+.hero-fade {
+  animation: fade-up 0.6s cubic-bezier(0.12, 0.23, 0.5, 1) backwards;
+}
+
+.header-drop {
+  animation: drop-in 0.9s cubic-bezier(0.53, 0, 0.47, 1) 2.3s backwards;
+}
+
+.intro-panel {
+  animation:
+    intro-collapse 1.3s cubic-bezier(0.58, 0, 0.33, 1) 1.6s forwards,
+    hide 0s 2.9s forwards;
+}
+
+.intro-text {
+  animation:
+    fade-out 0.4s cubic-bezier(0.44, 0, 0.56, 1) 2s forwards,
+    intro-text-rise 1.3s cubic-bezier(0.58, 0, 0.33, 1) 1.6s forwards;
+}
+
+.intro-word {
+  animation: word-in 0.8s cubic-bezier(0.44, 0, 0.56, 1) backwards;
+}
+
+/* Squircle corners where supported; elsewhere the radius is scaled down to look similar */
+.squircle {
+  --squircle-k: 0.752;
+  border-radius: calc(var(--radius, 12px) * var(--squircle-k));
+}
+
+@supports (corner-shape: superellipse(1.5)) {
+  .squircle {
+    --squircle-k: 1;
+    corner-shape: superellipse(1.5);
+  }
+}
+
+/* Header menu — each state sets the transition used to enter it (--t) */
+.header-menu {
+  --t: 0.55s cubic-bezier(0.04, 0.25, 0.32, 1);
+}
+.header-menu[data-state="dropped"] {
+  --t: 0.8s cubic-bezier(0.73, 0, 0.16, 1);
+}
+.header-menu[data-state="expanding"] {
+  --t: 0.25s cubic-bezier(0.12, 0.23, 0.5, 1);
+}
+.header-menu[data-state="open"] {
+  --t: 0.3s cubic-bezier(0.12, 0.23, 0.26, 1);
+}
+.header-menu[data-state="collapsing"] {
+  --t: 0.2s cubic-bezier(0.12, 0.23, 0.26, 1);
+}
+
+.menu-blob {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  translate: -50% 0;
+  border-radius: 50px;
+  transition:
+    top var(--t),
+    width var(--t),
+    height var(--t),
+    border-radius var(--t);
+}
+.header-menu[data-state="dropped"] .menu-blob {
+  top: 66px;
+}
+.header-menu:is([data-state="expanding"], [data-state="open"]) .menu-blob {
+  top: 66px;
+  width: var(--menu-w, 310px);
+  height: 50px;
+  border-radius: 12px;
+}
+.header-menu[data-state="collapsing"] .menu-blob {
+  top: 65px;
+}
+
+.menu-link {
+  height: 22px;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    height var(--t),
+    opacity var(--t),
+    visibility var(--t),
+    background-color 0.4s cubic-bezier(0.44, 0, 0.56, 1);
+}
+.header-menu:is([data-state="expanding"], [data-state="open"]) .menu-link {
+  height: 42px;
+}
+.header-menu[data-state="open"] .menu-link {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Burger → close (X) */
+.burger-line {
+  transition:
+    top var(--t),
+    bottom var(--t),
+    rotate var(--t);
+}
+.burger-top {
+  top: 5px;
+}
+.burger-bottom {
+  bottom: 5px;
+}
+.header-menu:is([data-state="dropped"], [data-state="expanding"], [data-state="open"]) .burger-top {
+  top: 7px;
+  rotate: -45deg;
+}
+.header-menu:is([data-state="dropped"], [data-state="expanding"], [data-state="open"]) .burger-bottom {
+  bottom: 7px;
+  rotate: 45deg;
+}
+
+@media (max-width: 809.98px) {
+  .header-menu[data-state="closed"] .menu-blob {
+    top: 40px;
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* Scroll reveal (see Reveal.tsx) — starting state and timing come from CSS variables */
+.reveal {
+  --reveal-delay: var(--rdelay, 0s);
+  transform-origin: var(--origin, 50% 50%);
+  transition:
+    opacity var(--rd, 0.6s) var(--re, cubic-bezier(0.44, 0, 0.56, 1)) var(--reveal-delay),
+    transform var(--rd, 0.6s) var(--re, cubic-bezier(0.44, 0, 0.56, 1)) var(--reveal-delay);
+}
+
+.reveal:not([data-inview]) {
+  opacity: var(--ro, 0);
+  transform: translate(var(--rx, 0px), var(--ry, 0px)) rotate(var(--rr, 0deg));
+}
+
+/* Optional desktop-only delay via --rdelay-md */
+@media (min-width: 810px) {
+  .reveal {
+    --reveal-delay: var(--rdelay-md, var(--rdelay, 0s));
+  }
+}
+
+/* Fixa AI tab images — slide in each time the tab changes (timings from the original) */
+@keyframes ai-image-in {
+  from {
+    opacity: 0;
+    transform: translateX(70px) scale(0.95);
+  }
+}
+
+@keyframes ai-image-in-mobile {
+  from {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+}
+
+.ai-image-in {
+  animation: ai-image-in 0.55s cubic-bezier(0.44, 0, 0.56, 1) backwards;
+}
+
+.ai-image-in-mobile {
+  animation: ai-image-in-mobile 0.7s cubic-bezier(0.44, 0, 0.56, 1) backwards;
+}
+
+/* Waitlist modal (see WaitlistDialog.tsx) — timings and curves from the original's Framer component */
+.waitlist-modal {
+  --wl-ease: cubic-bezier(0.15, 0.45, 0.15, 1.35);
+  --wl-out: cubic-bezier(0.44, 0, 0.56, 1);
+}
+
+.waitlist-modal::backdrop {
+  background: transparent;
+}
+
+.waitlist-backdrop {
+  opacity: 0;
+  transition: opacity 0.4s var(--wl-out);
+}
+
+/* Card: rises from below the screen while growing from 80%, landing at ~0.4s with no overshoot */
+.waitlist-card-wrap {
+  --wl-x: -50%;
+  /* Starts with its top just below the screen edge, like the original */
+  transform: translate(var(--wl-x), calc(100% - 13px)) scale(0.8);
+  transition: transform 0.4s var(--wl-out);
+}
+
+@media (max-width: 809.98px) {
+  .waitlist-card-wrap {
+    --wl-x: 0px;
+  }
+}
+
+/* Close button: the full-size button hidden behind the card's top edge (it scales with the card)… */
+.waitlist-close {
+  top: 0;
+  z-index: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  transform: translate(-50%, 0);
+  transition: top 0.2s var(--wl-out);
+}
+
+.waitlist-card {
+  z-index: 1;
+}
+
+.waitlist-close-icon {
+  opacity: 0;
+  transition: opacity 0.2s var(--wl-out);
+}
+
+.waitlist-modal[data-state="open"] .waitlist-backdrop {
+  opacity: 1;
+}
+
+.waitlist-modal[data-state="open"] .waitlist-card-wrap {
+  transform: translate(var(--wl-x), 0) scale(1);
+  transition: transform 0.4s cubic-bezier(0.44, 0, 0.35, 1);
+}
+
+/* …drips up out of it (gooey filter, like the header menu) as the card lands — same timing as the
+   original: starts 0.3s in, overshoots ~4px, settles by ~0.85s. Then the X fades in. */
+.waitlist-modal[data-state="open"] .waitlist-close {
+  top: -62px;
+  transition: top 0.55s var(--wl-ease) 0.3s;
+}
+
+.waitlist-modal[data-state="open"] .waitlist-close-icon {
+  opacity: 1;
+  transition: opacity 0.4s var(--wl-out) 0.56s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-line,
+  .hero-fade,
+  .header-drop,
+  .intro-word,
+  .ai-image-in,
+  .ai-image-in-mobile {
+    animation: none;
+  }
+
+  .waitlist-modal * {
+    transition: none !important;
+  }
+
+  .intro-panel {
+    display: none;
+  }
+
+  .reveal {
+    transition: none;
+  }
 }
