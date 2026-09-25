@@ -23,11 +23,7 @@ export async function joinWaitlist(_prev: WaitlistState, formData: FormData): Pr
   }
 
   try {
-    const { position, existing } = await addSignup({
-      email,
-      name: name || undefined,
-      createdAt: new Date().toISOString(),
-    });
+    const { position, existing } = await addSignup({ email, name: name || undefined });
     return { status: "joined", email, name, position, existing };
   } catch (err) {
     console.error("Waitlist signup failed", err);

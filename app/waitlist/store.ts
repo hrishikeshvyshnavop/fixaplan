@@ -1,44 +1,52 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
+import config from "@payload-config";
+import { getPayload } from "payload";
 
 /*
- * Waitlist storage: a JSON file in /data (git-ignored).
- * Fine for local dev and a single server. On serverless hosts (e.g. Vercel) the disk is
- * read-only / not shared, so swap addSignup() for a database or email-list API call.
+ * Waitlist storage: the Payload `waitlist` collection (see collections/Waitlist.ts).
+ * Signups are listed and exportable at /admin.
  */
 
 export type Signup = {
   email: string;
   name?: string;
-  createdAt: string;
 };
 
-const FILE = path.join(process.cwd(), "data", "waitlist.json");
-
-async function readAll(): Promise<Signup[]> {
-  try {
-    return JSON.parse(await readFile(FILE, "utf8")) as Signup[];
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
-    throw err;
-  }
+async function findByEmail(email: string) {
+  const payload = await getPayload({ config });
+  const { docs } = await payload.find({
+    collection: "waitlist",
+    where: { email: { equals: email } },
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+  });
+  return docs[0];
 }
 
-// Writes are queued so two signups at the same moment can't overwrite each other
-let queue: Promise<unknown> = Promise.resolve();
-
 /** Adds the signup unless the email is already on the list. Returns its place in line. */
-export function addSignup(signup: Signup): Promise<{ position: number; existing: boolean }> {
-  const run = queue.then(async () => {
-    const all = await readAll();
-    const index = all.findIndex((s) => s.email === signup.email);
-    if (index !== -1) return { position: index + 1, existing: true };
+export async function addSignup(signup: Signup): Promise<{ position: number; existing: boolean }> {
+  const payload = await getPayload({ config });
 
-    all.push(signup);
-    await mkdir(path.dirname(FILE), { recursive: true });
-    await writeFile(FILE, JSON.stringify(all, null, 2));
-    return { position: all.length, existing: false };
+  let doc = await findByEmail(signup.email);
+  const existing = Boolean(doc);
+  if (!doc) {
+    try {
+      doc = await payload.create({
+        collection: "waitlist",
+        data: { email: signup.email, name: signup.name },
+        overrideAccess: true,
+      });
+    } catch (err) {
+      // Two signups with the same email at once: the unique index rejects the second
+      doc = await findByEmail(signup.email);
+      if (!doc) throw err;
+    }
+  }
+
+  const { totalDocs } = await payload.count({
+    collection: "waitlist",
+    where: { createdAt: { less_than_equal: doc.createdAt } },
+    overrideAccess: true,
   });
-  queue = run.catch(() => {});
-  return run;
+  return { position: totalDocs, existing };
 }

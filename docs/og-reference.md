@@ -131,7 +131,7 @@ Code: `app/components/WordChip.tsx`.
 | Waitlist email check | none, submits empty forms | inline message under the field for a missing or mistyped email | fewer bad signups |
 | Waitlist page scroll | page scrolls behind the modal | scroll locked while open | modal convention |
 | After a successful signup | form stays filled | next open starts empty | clean restart |
-| Waitlist backend | Framer forms | `app/waitlist/actions.ts` + `store.ts` (JSON file; swap for a DB or email service before deploying) | our own backend |
+| Waitlist backend | Framer forms | `app/waitlist/actions.ts` + `store.ts`, saved to the Payload `waitlist` collection (see [cms.md](cms.md)) | our own backend |
 | Header link hash | `#fixaai` | `#fixa-ai` | our section id |
 | "impact outside" image | ~21px left of centre | centred | not yet matched |
 | Fixed page background | full-screen `backdrop-filter: blur(20px)` | no backdrop blur (pictures, if any, blurred once) | the blur changed **0 pixels** over the gradient but made ~58% of scroll frames slow |
