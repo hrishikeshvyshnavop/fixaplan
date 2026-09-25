@@ -175,29 +175,33 @@ function WaitlistForm({ onSubmitted }: { onSubmitted: () => void }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [hint, setHint] = useState("");
-  // A server error shows on the button until the person edits a field again
-  const [serverError, setServerError] = useState(false);
+  // "Submitted" or a server error shows on the button until the person edits a field again.
+  // Like the original, editing after "Submitted" brings back "Join the waitlist" so they can resend.
+  const [result, setResult] = useState<"none" | "success" | "error">("none");
   const [lastState, setLastState] = useState(state);
   const hintId = useId();
 
   if (state !== lastState) {
     setLastState(state);
-    if (state.status === "error") setServerError(true);
-    if (state.status === "joined") onSubmitted();
+    if (state.status === "error") setResult("error");
+    if (state.status === "joined") {
+      setResult("success");
+      onSubmitted();
+    }
   }
 
   const button: ButtonState = pending
     ? "loading"
-    : state.status === "joined"
+    : result === "success"
       ? "success"
-      : serverError
+      : result === "error"
         ? "error"
         : "default";
 
   function edit(set: (v: string) => void, value: string) {
     set(value);
     setHint("");
-    setServerError(false);
+    setResult("none");
   }
 
   // Catch a missing or mistyped email instantly instead of waiting for the server

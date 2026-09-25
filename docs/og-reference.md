@@ -72,6 +72,11 @@ Code: `app/components/WaitlistDialog.tsx`, waitlist section of `app/globals.css`
 | Error | background `rgba(204,204,204,0.15)`, text `rgb(105,105,105)`, "Something went wrong" |
 | Disabled | opacity 0.5 |
 
+- Framer's form state: `incomplete`/`complete` → `pending` → `success` or `error`. Submitting only
+  works from `incomplete`/`complete`.
+- After **Submitted**, editing a field returns it to "Join the waitlist", and it can be sent again.
+- Nothing is remembered across reloads (no cookie/storage).
+
 ### Opening motion (from the click)
 - **~50ms** before anything moves.
 - **Card:** starts with its top at the bottom edge of the screen (y≈903 in a 900px viewport), scale
@@ -129,6 +134,7 @@ Code: `app/components/WordChip.tsx`.
 |---|---|---|---|
 | Waitlist subtitle | "…access to **Voca**…" | "…access to **Fixa**…" | template leftover |
 | Waitlist email check | none, submits empty forms | inline message under the field for a missing or mistyped email | fewer bad signups |
+| Waitlist error state | stays "Something went wrong" and blocks submitting until reload (Framer form quirk) | editing a field clears it so they can retry | don't lock people out |
 | Waitlist page scroll | page scrolls behind the modal | scroll locked while open | modal convention |
 | After a successful signup | form stays filled | next open starts empty | clean restart |
 | Waitlist backend | Framer forms | `app/waitlist/actions.ts` + `store.ts`, saved to the Payload `waitlist` collection (see [cms.md](cms.md)) | our own backend |
