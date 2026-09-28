@@ -8,6 +8,7 @@ export const FAQ_DEFAULTS = {
   chipText: "email us",
   chipHref: "mailto:info@fixaplan.com",
   introEnd: "anytime.",
+  chipImage: "/BdM8sP8QPHpVTvZLxWbdvJIjAhI.png",
   items: [
     {
       question: "Is Fixa made for people with ADHD?",
@@ -72,6 +73,15 @@ export const Faq: GlobalConfig = {
         { name: "chipHref", label: "Chip link", type: "text", required: true, defaultValue: FAQ_DEFAULTS.chipHref },
         { name: "introEnd", label: "Text after the chip", type: "text", defaultValue: FAQ_DEFAULTS.introEnd },
       ],
+    },
+    {
+      name: "chipImage",
+      label: "Chip hover image",
+      type: "upload",
+      relationTo: "media",
+      admin: {
+        description: "Pops up above the chip on hover. Shown at 222×150 (landscape, about 3:2). Empty uses the original picture.",
+      },
     },
     {
       name: "items",

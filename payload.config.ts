@@ -1,10 +1,12 @@
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { s3Storage } from "@payloadcms/storage-s3";
 import path from "path";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { fileURLToPath } from "url";
 
+import { Media } from "./collections/Media";
 import { Users } from "./collections/Users";
 import { Waitlist } from "./collections/Waitlist";
 import { Faq } from "./globals/Faq";
@@ -21,7 +23,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Waitlist],
+  collections: [Users, Waitlist, Media],
   globals: [Faq],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
@@ -37,5 +39,28 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || "",
     },
   }),
+  plugins: [
+    // Uploads go to the public Supabase Storage bucket over its S3 API, and the page links
+    // straight to the bucket's public URL (no round trip through Payload)
+    s3Storage({
+      collections: {
+        media: {
+          disablePayloadAccessControl: true,
+          generateFileURL: ({ filename, prefix }) =>
+            [process.env.S3_PUBLIC_URL, prefix, filename].filter(Boolean).join("/"),
+        },
+      },
+      bucket: process.env.S3_BUCKET || "media",
+      config: {
+        endpoint: process.env.S3_ENDPOINT,
+        region: process.env.S3_REGION,
+        forcePathStyle: true,
+        credentials: {
+          accessKeyId: process.env.S3_ACCESS_KEY_ID || "",
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || "",
+        },
+      },
+    }),
+  ],
   sharp,
 });

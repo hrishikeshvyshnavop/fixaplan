@@ -19,12 +19,13 @@ import { FAQ_DEFAULTS } from "@/globals/Faq";
 // entry is left empty, today's text is used.
 async function getFaq(): Promise<typeof FAQ_DEFAULTS> {
   const payload = await getPayload({ config });
-  const saved = await payload.findGlobal({ slug: "faq", depth: 0 });
+  const saved = await payload.findGlobal({ slug: "faq", depth: 1 });
   return {
     intro: saved.intro || FAQ_DEFAULTS.intro,
     chipText: saved.chipText || FAQ_DEFAULTS.chipText,
     chipHref: saved.chipHref || FAQ_DEFAULTS.chipHref,
     introEnd: saved.introEnd ?? FAQ_DEFAULTS.introEnd,
+    chipImage: (typeof saved.chipImage === "object" && saved.chipImage?.url) || FAQ_DEFAULTS.chipImage,
     items: saved.items?.length
       ? saved.items.map(({ question, answer }) => ({ question, answer }))
       : FAQ_DEFAULTS.items,
@@ -205,7 +206,7 @@ export default async function Home() {
           intro={faq.intro}
           chipText={faq.chipText}
           chipHref={faq.chipHref}
-          chipImage="/BdM8sP8QPHpVTvZLxWbdvJIjAhI.png"
+          chipImage={faq.chipImage}
           introEnd={faq.introEnd}
           items={faq.items}
         >
