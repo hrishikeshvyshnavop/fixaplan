@@ -16,6 +16,8 @@ This site recreates https://fixaplan.com — match the original before building 
 
 `.env` (git-ignored) needs `DATABASE_URL=file:./data/payload.db` and `PAYLOAD_SECRET`. Details are in @docs/cms.md.
 
+**In progress:** moving to Supabase Postgres + Vercel and making page text editable in Payload. Steps, status and decisions: @docs/supabase.md. Update its status table as steps are finished.
+
 ## Architecture
 
 - **Two root layouts (route groups).** `app/(frontend)/` is the public site: `layout.tsx` (fonts, metadata, Lenis), `page.tsx`, `globals.css`, `fonts/`, `opengraph-image.png`. `app/(payload)/` is Payload's admin (`/admin`) and API (`/api`). It is generated, so don't edit it by hand. Moving between the two groups is a full page load. `app/components/`, `app/waitlist/` and `app/site.ts` sit outside both groups because they aren't routes. Import them as `@/app/...`.
