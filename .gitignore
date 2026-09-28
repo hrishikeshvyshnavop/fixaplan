@@ -43,3 +43,6 @@ next-env.d.ts
 # waitlist signups (contains emails)
 /data
 /debug.log
+
+.vercel
+.env*
