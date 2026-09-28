@@ -19,11 +19,11 @@ is set up now.
 |---|---|
 | 1. Add Supabase MCP to Claude Code | done (needs sign-in, see below) |
 | 2. Create Supabase project, put the connection string in `.env` | done: project `fixaplan`, ref `cpuxbslhldggplbmdgpv`, org "Hrishi's projects" (Vercel-managed), us-east-1, session pooler `aws-0-us-east-1.pooler.supabase.com:5432` |
-| 3. Switch Payload to `@payloadcms/db-postgres`, create a new first migration | in progress: adapter switched; old SQLite migrations still to delete, new migration still to create |
+| 3. Switch Payload to `@payloadcms/db-postgres`, create a new first migration | done: `migrations/20260928_061511_initial` (users, waitlist, FAQ), applied to Supabase; build, FAQ edit and API access checked |
 | 4. Page text editable in Payload (one editing page per section), page reads it | in progress: FAQ done (`globals/Faq.ts`) |
 | 5. Refresh the homepage when content is saved (page stays static) | in progress: FAQ global does it |
 | 6. Update `cms.md`, `CLAUDE.md`, check build, text edits, signups | todo |
-| 7. Vercel: environment settings, deploy, create admin, Lighthouse | todo |
+| 7. Vercel: environment settings, deploy, create admin, Lighthouse | in progress: env vars set with the CLI (`DATABASE_URL`, `PAYLOAD_SECRET` Sensitive; `NEXT_PUBLIC_SITE_URL`) for Production + Preview; admin created |
 
 Update this table as steps are finished.
 

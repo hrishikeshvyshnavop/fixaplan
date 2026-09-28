@@ -6,7 +6,7 @@ the code.
 
 - **Admin panel:** `/admin` (first visit asks you to create an admin user)
 - **REST API:** `/api/...` (GraphQL at `/api/graphql`)
-- **Database:** SQLite file `data/payload.db` (git-ignored)
+- **Database:** Supabase Postgres, project `fixaplan` (ref `cpuxbslhldggplbmdgpv`). See [supabase.md](supabase.md)
 
 Versions: `payload` / `@payloadcms/*` 3.90.2 on Next 16.3.5 (Payload supports Next `>=16.3.3 <17`).
 
@@ -17,7 +17,7 @@ Versions: `payload` / `@payloadcms/*` 3.90.2 on Next 16.3.5 (Payload supports Ne
 1. `npm install`
 2. Create `.env` in the project root (it is git-ignored, so it's not in the repo):
    ```
-   DATABASE_URL=file:./data/payload.db
+   DATABASE_URL=postgresql://postgres.cpuxbslhldggplbmdgpv:<PASSWORD>@aws-0-us-east-1.pooler.supabase.com:5432/postgres
    PAYLOAD_SECRET=<long random string>
    ```
    Generate a secret with
@@ -29,7 +29,7 @@ Versions: `payload` / `@payloadcms/*` 3.90.2 on Next 16.3.5 (Payload supports Ne
 
 | Path | What |
 |---|---|
-| `payload.config.ts` | Payload config: collections, SQLite adapter, secret, migrations |
+| `payload.config.ts` | Payload config: collections, globals, Postgres adapter, secret, migrations |
 | `collections/Users.ts` | Admin accounts (email + password) |
 | `collections/Waitlist.ts` | Signups: `email` (unique), `name`, automatic `createdAt` |
 | `globals/Faq.ts` | FAQ text (intro, email chip, questions). Defaults are today's copy; saving refreshes `/` |
@@ -72,7 +72,7 @@ returns 403). Only logged-in admins can see them in `/admin`, where they can be 
 ## Changing the data model
 
 1. Edit or add a collection in `collections/` and register it in `payload.config.ts`.
-2. In dev, Payload updates the SQLite schema automatically.
+2. In dev, Payload updates the schema automatically (it pushes straight to Supabase, which production also uses, so create the migration before deploying).
 3. Before deploying, create a migration: `npm run payload migrate:create <name>`.
    Production applies anything new in `migrations/` on startup (`prodMigrations`).
 4. `npm run generate:types` refreshes `payload-types.ts`.
@@ -80,7 +80,7 @@ returns 403). Only logged-in admins can see them in `/admin`, where they can be 
 
 ## Changes made to add Payload
 
-- Installed `payload`, `@payloadcms/next`, `@payloadcms/richtext-lexical`, `@payloadcms/db-sqlite`,
+- Installed `payload`, `@payloadcms/next`, `@payloadcms/richtext-lexical`, `@payloadcms/db-sqlite` (later swapped for `@payloadcms/db-postgres`),
   `graphql`, `sharp`.
 - `package.json`: `"type": "module"` (the Payload CLI can't load the config without it) and
   scripts `payload`, `generate:types`, `generate:importmap`.
@@ -107,9 +107,6 @@ returns 403). Only logged-in admins can see them in `/admin`, where they can be 
 
 ## Before deploying
 
-- **Serverless hosts (Vercel etc.):** the SQLite file won't persist. Switch to
-  `@payloadcms/db-postgres` (Neon, Supabase) with `DATABASE_URL=postgres://...`, then create a
-  fresh migration.
 - Set `PAYLOAD_SECRET` and `DATABASE_URL` in the host's environment settings.
 - Re-run Lighthouse and compare with [og-reference.md](og-reference.md#performance-and-seo). The
   admin bundle only loads on `/admin`, but it's worth checking.
