@@ -1,4 +1,4 @@
-import { sqliteAdapter } from "@payloadcms/db-sqlite";
+import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import path from "path";
 import { buildConfig } from "payload";
@@ -13,8 +13,7 @@ import { migrations } from "./migrations";
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
-// Admin panel at /admin, REST API at /api. SQLite for now; swap the adapter for
-// @payloadcms/db-postgres before deploying to a serverless host.
+// Admin panel at /admin, REST API at /api. Database: Supabase Postgres (see docs/supabase.md).
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -29,12 +28,13 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
-  db: sqliteAdapter({
+  db: postgresAdapter({
     // Dev pushes schema changes automatically; production applies migrations/ on startup.
     // After changing a collection, run `npm run payload migrate:create`.
     prodMigrations: migrations,
-    client: {
-      url: process.env.DATABASE_URL || "",
+    // Locally the session pooler (port 5432); on Vercel the transaction pooler (port 6543)
+    pool: {
+      connectionString: process.env.DATABASE_URL || "",
     },
   }),
   sharp,

@@ -18,8 +18,8 @@ is set up now.
 | Step | State |
 |---|---|
 | 1. Add Supabase MCP to Claude Code | done (needs sign-in, see below) |
-| 2. Create Supabase project, put the connection string in `.env` | **todo (user)** |
-| 3. Switch Payload to `@payloadcms/db-postgres`, create a new first migration | todo |
+| 2. Create Supabase project, put the connection string in `.env` | done: project `fixaplan`, ref `cpuxbslhldggplbmdgpv`, org "Hrishi's projects" (Vercel-managed), us-east-1, session pooler `aws-0-us-east-1.pooler.supabase.com:5432` |
+| 3. Switch Payload to `@payloadcms/db-postgres`, create a new first migration | in progress: adapter switched; old SQLite migrations still to delete, new migration still to create |
 | 4. Page text editable in Payload (one editing page per section), page reads it | in progress: FAQ done (`globals/Faq.ts`) |
 | 5. Refresh the homepage when content is saved (page stays static) | in progress: FAQ global does it |
 | 6. Update `cms.md`, `CLAUDE.md`, check build, text edits, signups | todo |
