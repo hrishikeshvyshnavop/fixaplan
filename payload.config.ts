@@ -31,8 +31,10 @@ export default buildConfig({
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
   db: postgresAdapter({
-    // Dev pushes schema changes automatically; production applies migrations/ on startup.
-    // After changing a collection, run `npm run payload migrate:create`.
+    // Local dev and Vercel share one Supabase database, so dev must not push schema changes
+    // (that leaves a "dev" marker that makes every later build stop at a data-loss prompt).
+    // After changing a collection: `npm run payload -- migrate:create <name>`, then `npm run payload -- migrate`.
+    push: false,
     prodMigrations: migrations,
     // Locally the session pooler (port 5432); on Vercel the transaction pooler (port 6543)
     pool: {

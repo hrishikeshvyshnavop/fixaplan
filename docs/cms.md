@@ -87,8 +87,8 @@ returns 403). Only logged-in admins can see them in `/admin`, where they can be 
 ## Changing the data model
 
 1. Edit or add a collection in `collections/` and register it in `payload.config.ts`.
-2. In dev, Payload updates the schema automatically (it pushes straight to Supabase, which production also uses, so create the migration before deploying).
-3. Before deploying, create a migration: `npm run payload migrate:create <name>`.
+2. Dev does **not** update the schema (`push: false`), because local dev and Vercel share the Supabase database. A dev push leaves a `dev` row in `payload_migrations`, and every later build then stops at a "data loss" prompt and times out.
+3. Create a migration with `npm run payload -- migrate:create <name>`, and apply it with `npm run payload -- migrate`.
    Production applies anything new in `migrations/` on startup (`prodMigrations`).
 4. `npm run generate:types` refreshes `payload-types.ts`.
    `npm run generate:importmap` is needed after adding custom admin components.
