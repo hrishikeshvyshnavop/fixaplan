@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 
 import { Users } from "./collections/Users";
 import { Waitlist } from "./collections/Waitlist";
+import { Faq } from "./globals/Faq";
 import { migrations } from "./migrations";
 
 const filename = fileURLToPath(import.meta.url);
@@ -22,6 +23,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Waitlist],
+  globals: [Faq],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: {

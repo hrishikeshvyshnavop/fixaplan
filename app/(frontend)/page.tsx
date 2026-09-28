@@ -1,5 +1,5 @@
 import AdhdSection from "@/app/components/AdhdSection";
-import FaqSection, { type FaqItem } from "@/app/components/FaqSection";
+import FaqSection from "@/app/components/FaqSection";
 import FeaturesSection from "@/app/components/FeaturesSection";
 import FixaAiSection from "@/app/components/FixaAiSection";
 import Footer from "@/app/components/Footer";
@@ -11,67 +11,62 @@ import NextStepSection from "@/app/components/NextStepSection";
 import WaitlistDialog from "@/app/components/WaitlistDialog";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/app/site";
 import { WAITLIST_HASH } from "@/app/waitlist/constants";
+import config from "@payload-config";
+import { getPayload } from "payload";
+import { FAQ_DEFAULTS } from "@/globals/Faq";
 
-const FAQ: FaqItem[] = [
-  {
-    question: "Is Fixa made for people with ADHD?",
-    answer:
-      "Fixa is designed with ADHD-friendly planning in mind: low-friction task creation, less visual noise, and a structure that helps you start without overthinking. It’s not a “perfect productivity” system it’s a calmer way to move through your day.",
-  },
-  {
-    question: "What makes Fixa different from other to-do apps?",
-    answer:
-      "Most to-do apps give you more features, more lists, and more pressure. Fixa focuses on what actually helps: clarity, gentle structure, and a simple flow that doesn’t overwhelm your brain.",
-  },
-  {
-    question: "Will Fixa help me stay focused?",
-    answer:
-      "Yes. Fixa includes focus tools like a timer to help you stay in the zone. But the bigger difference is how the app feels: fewer distractions, fewer decisions, and a calmer interface that makes it easier to keep going.",
-  },
-  {
-    question: "Does Fixa replace therapy or ADHD medication?",
-    answer:
-      "No. Fixa isn’t medical treatment, and it doesn’t replace professional support. It’s a planning tool that can support your day-to-day life alongside whatever works best for you.",
-  },
-  {
-    question: "How do you handle privacy?",
-    answer:
-      "Your tasks are personal and we treat them that way. We’re building Fixa with privacy and security in mind, and we’ll share clear details before launch so you know exactly what’s stored and why.",
-  },
-];
+// FAQ text from Payload (edited at /admin → Globals → FAQ). Until it's saved there, or if an
+// entry is left empty, today's text is used.
+async function getFaq(): Promise<typeof FAQ_DEFAULTS> {
+  const payload = await getPayload({ config });
+  const saved = await payload.findGlobal({ slug: "faq", depth: 0 });
+  return {
+    intro: saved.intro || FAQ_DEFAULTS.intro,
+    chipText: saved.chipText || FAQ_DEFAULTS.chipText,
+    chipHref: saved.chipHref || FAQ_DEFAULTS.chipHref,
+    introEnd: saved.introEnd ?? FAQ_DEFAULTS.introEnd,
+    items: saved.items?.length
+      ? saved.items.map(({ question, answer }) => ({ question, answer }))
+      : FAQ_DEFAULTS.items,
+  };
+}
 
 // Structured data for search engines: who we are, the site, and the FAQ (same questions as on the page)
-const JSON_LD = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": `${SITE_URL}/#organization`,
-      name: "Fixa",
-      url: SITE_URL,
-      logo: `${SITE_URL}/icon-light.svg`,
-      email: "info@fixaplan.com",
-    },
-    {
-      "@type": "WebSite",
-      "@id": `${SITE_URL}/#website`,
-      name: SITE_NAME,
-      description: SITE_DESCRIPTION,
-      url: SITE_URL,
-      publisher: { "@id": `${SITE_URL}/#organization` },
-    },
-    {
-      "@type": "FAQPage",
-      mainEntity: FAQ.map((item) => ({
-        "@type": "Question",
-        name: item.question,
-        acceptedAnswer: { "@type": "Answer", text: item.answer },
-      })),
-    },
-  ],
-};
+function jsonLd(faq: typeof FAQ_DEFAULTS) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name: "Fixa",
+        url: SITE_URL,
+        logo: `${SITE_URL}/icon-light.svg`,
+        email: "info@fixaplan.com",
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        name: SITE_NAME,
+        description: SITE_DESCRIPTION,
+        url: SITE_URL,
+        publisher: { "@id": `${SITE_URL}/#organization` },
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: faq.items.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
+        })),
+      },
+    ],
+  };
+}
 
-export default function Home() {
+export default async function Home() {
+  const faq = await getFaq();
+
   return (
     <>
       <Intro text="Now is the time." />
@@ -207,12 +202,12 @@ export default function Home() {
         />
         <FaqSection
           afterId="next-step"
-          intro="We’re here to help. If you didn’t find the answer to your question, feel free to"
-          chipText="email us"
-          chipHref="mailto:info@fixaplan.com"
+          intro={faq.intro}
+          chipText={faq.chipText}
+          chipHref={faq.chipHref}
           chipImage="/BdM8sP8QPHpVTvZLxWbdvJIjAhI.png"
-          introEnd="anytime."
-          items={FAQ}
+          introEnd={faq.introEnd}
+          items={faq.items}
         >
           <Footer
             tagline="Gentle planning for busy minds"
@@ -241,7 +236,7 @@ export default function Home() {
       <script
         type="application/ld+json"
         // Escape "<" so no string in the data can close the script tag
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD).replace(/</g, "\\u003c") }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(faq)).replace(/</g, "\\u003c") }}
       />
     </>
   );

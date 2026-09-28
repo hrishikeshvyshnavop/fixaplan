@@ -20,8 +20,8 @@ is set up now.
 | 1. Add Supabase MCP to Claude Code | done (needs sign-in, see below) |
 | 2. Create Supabase project, put the connection string in `.env` | **todo (user)** |
 | 3. Switch Payload to `@payloadcms/db-postgres`, create a new first migration | todo |
-| 4. Page text editable in Payload (one editing page per section), page reads it | todo |
-| 5. Refresh the homepage when content is saved (page stays static) | todo |
+| 4. Page text editable in Payload (one editing page per section), page reads it | in progress: FAQ done (`globals/Faq.ts`) |
+| 5. Refresh the homepage when content is saved (page stays static) | in progress: FAQ global does it |
 | 6. Update `cms.md`, `CLAUDE.md`, check build, text edits, signups | todo |
 | 7. Vercel: environment settings, deploy, create admin, Lighthouse | todo |
 
