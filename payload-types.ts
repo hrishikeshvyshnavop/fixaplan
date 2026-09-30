@@ -383,6 +383,7 @@ export interface Hero {
    * The ID from the Kinescope link, e.g. kinescope.io/wXQXtViozUbKjC61PdWpw2
    */
   videoId: string;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -410,6 +411,7 @@ export interface Faq {
         id?: string | null;
       }[]
     | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -425,6 +427,7 @@ export interface HeroSelect<T extends boolean = true> {
   ctaNote?: T;
   ctaLabel?: T;
   videoId?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -446,6 +449,7 @@ export interface FaqSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

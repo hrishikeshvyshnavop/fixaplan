@@ -23,6 +23,16 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    // The editing pages for the homepage's globals show the page beside the form. /preview turns
+    // on Next's draft mode (logged-in admins only), so the page reads the latest autosaved draft.
+    livePreview: {
+      globals: [Hero.slug, Faq.slug],
+      url: ({ req }) => `${req.origin}/preview`,
+      breakpoints: [
+        { label: "Phone", name: "phone", width: 390, height: 844 },
+        { label: "Desktop", name: "desktop", width: 1440, height: 900 },
+      ],
+    },
   },
   collections: [Users, Waitlist, Media],
   globals: [Hero, Faq],

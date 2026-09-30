@@ -21,6 +21,11 @@ export const Hero: GlobalConfig = {
     read: () => true,
     update: ({ req }) => Boolean(req.user),
   },
+  // Edits autosave as drafts, so Live Preview shows them as you type; the site changes on Publish
+  versions: {
+    drafts: { autosave: { interval: 375 } },
+    max: 20,
+  },
   hooks: {
     afterChange: [revalidateHome],
   },

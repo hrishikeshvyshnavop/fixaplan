@@ -5,6 +5,7 @@ import FixaAiSection from "@/app/components/FixaAiSection";
 import Footer from "@/app/components/Footer";
 import FixedBackdrop from "@/app/components/FixedBackdrop";
 import HeroSection from "@/app/components/HeroSection";
+import LivePreviewBar from "@/app/components/LivePreviewBar";
 import Header from "@/app/components/Header";
 import Intro from "@/app/components/Intro";
 import NextStepSection from "@/app/components/NextStepSection";
@@ -12,14 +13,16 @@ import WaitlistDialog from "@/app/components/WaitlistDialog";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/app/site";
 import { WAITLIST_HASH } from "@/app/waitlist/constants";
 import config from "@payload-config";
+import { draftMode } from "next/headers";
 import { getPayload } from "payload";
 import { FAQ_DEFAULTS } from "@/globals/Faq";
 import { HERO_DEFAULTS } from "@/globals/Hero";
 
 // Hero text and video from Payload (/admin → Globals → Hero). Empty fields fall back to today's text.
-async function getHero(): Promise<typeof HERO_DEFAULTS> {
+// `draft` (Live Preview only) reads the latest autosave instead of the published text.
+async function getHero(draft: boolean): Promise<typeof HERO_DEFAULTS> {
   const payload = await getPayload({ config });
-  const saved = await payload.findGlobal({ slug: "hero" });
+  const saved = await payload.findGlobal({ slug: "hero", draft });
   return {
     titleTop: saved.titleTop || HERO_DEFAULTS.titleTop,
     titleBottom: saved.titleBottom || HERO_DEFAULTS.titleBottom,
@@ -33,9 +36,9 @@ async function getHero(): Promise<typeof HERO_DEFAULTS> {
 
 // FAQ text from Payload (edited at /admin → Globals → FAQ). Until it's saved there, or if an
 // entry is left empty, today's text is used.
-async function getFaq(): Promise<typeof FAQ_DEFAULTS> {
+async function getFaq(draft: boolean): Promise<typeof FAQ_DEFAULTS> {
   const payload = await getPayload({ config });
-  const saved = await payload.findGlobal({ slug: "faq", depth: 1 });
+  const saved = await payload.findGlobal({ slug: "faq", depth: 1, draft });
   return {
     intro: saved.intro || FAQ_DEFAULTS.intro,
     chipText: saved.chipText || FAQ_DEFAULTS.chipText,
@@ -82,7 +85,9 @@ function jsonLd(faq: typeof FAQ_DEFAULTS) {
 }
 
 export default async function Home() {
-  const [hero, faq] = await Promise.all([getHero(), getFaq()]);
+  // Only on for admins who came through /preview; everyone else gets the static page
+  const { isEnabled: preview } = await draftMode();
+  const [hero, faq] = await Promise.all([getHero(preview), getFaq(preview)]);
 
   return (
     <>
@@ -251,6 +256,7 @@ export default async function Home() {
         </FaqSection>
       </main>
       <WaitlistDialog />
+      {preview && <LivePreviewBar />}
       <script
         type="application/ld+json"
         // Escape "<" so no string in the data can close the script tag

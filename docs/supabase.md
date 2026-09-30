@@ -20,8 +20,8 @@ is set up now.
 | 1. Add Supabase MCP to Claude Code | done (needs sign-in, see below) |
 | 2. Create Supabase project, put the connection string in `.env` | done: project `fixaplan`, ref `cpuxbslhldggplbmdgpv`, org "Hrishi's projects" (Vercel-managed), us-east-1, session pooler `aws-0-us-east-1.pooler.supabase.com:5432` |
 | 3. Switch Payload to `@payloadcms/db-postgres`, create a new first migration | done: `migrations/20260928_061511_initial` (users, waitlist, FAQ), applied to Supabase; build, FAQ edit and API access checked |
-| 4. Page text editable in Payload (one editing page per section), page reads it | in progress: FAQ done (`globals/Faq.ts`) |
-| 5. Refresh the homepage when content is saved (page stays static) | in progress: FAQ global does it |
+| 4. Page text editable in Payload (one editing page per section), page reads it | in progress: FAQ, Hero done (`globals/Faq.ts`, `globals/Hero.ts`), with drafts and Live Preview (migration `20260930_094501_live_preview_drafts`) |
+| 5. Refresh the homepage when content is saved (page stays static) | in progress: FAQ and Hero do it on publish (`globals/revalidateHome.ts`) |
 | 6. Update `cms.md`, `CLAUDE.md`, check build, text edits, signups | todo |
 | 7. Vercel: environment settings, deploy, create admin, Lighthouse | in progress: env vars set with the CLI (`DATABASE_URL`, `PAYLOAD_SECRET` Sensitive; `NEXT_PUBLIC_SITE_URL`) for Production + Preview; admin created |
 
@@ -77,6 +77,8 @@ claude mcp add --transport http supabase "https://mcp.supabase.com/mcp?features=
 - `page.tsx` reads them with `payload.findGlobal()`. The JSON-LD FAQ uses the same data.
 - An `afterChange` hook calls `revalidatePath("/")`, so edits show straight away and the page stays
   static.
+- Each global gets drafts with autosave and is added to `admin.livePreview.globals` in
+  `payload.config.ts`, and `page.tsx` passes `draft` to `findGlobal` (see cms.md, "Drafts and Live Preview").
 - The text still has to match the original site (see [og-reference.md](og-reference.md)).
 
 ## 7. Vercel (plan)
