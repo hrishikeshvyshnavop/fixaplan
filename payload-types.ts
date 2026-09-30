@@ -90,9 +90,11 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
+    hero: Hero;
     faq: Faq;
   };
   globalsSelect: {
+    hero: HeroSelect<false> | HeroSelect<true>;
     faq: FaqSelect<false> | FaqSelect<true>;
   };
   locale: null;
@@ -355,6 +357,37 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero".
+ */
+export interface Hero {
+  id: number;
+  titleTop: string;
+  titleBottom: string;
+  /**
+   * Italic serif word at the end of the second line
+   */
+  titleAccent: string;
+  /**
+   * Sentence under the headline. Keep it short: the box is about 280px wide.
+   */
+  description: string;
+  /**
+   * One line on desktop; it doesn't wrap
+   */
+  ctaNote: string;
+  /**
+   * The button always opens the waitlist
+   */
+  ctaLabel: string;
+  /**
+   * The ID from the Kinescope link, e.g. kinescope.io/wXQXtViozUbKjC61PdWpw2
+   */
+  videoId: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "faq".
  */
 export interface Faq {
@@ -379,6 +412,22 @@ export interface Faq {
     | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero_select".
+ */
+export interface HeroSelect<T extends boolean = true> {
+  titleTop?: T;
+  titleBottom?: T;
+  titleAccent?: T;
+  description?: T;
+  ctaNote?: T;
+  ctaLabel?: T;
+  videoId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

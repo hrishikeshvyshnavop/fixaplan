@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import Button from "@/app/components/Button";
 import HeroVideo from "@/app/components/HeroVideo";
 
-const VIDEO_ID = "wXQXtViozUbKjC61PdWpw2";
-const VIDEO_SRC = `https://kinescope.io/embed/${VIDEO_ID}?autoplay=1&muted=1&loop=1&playsinline=1&controls=0&preload=auto`;
+const videoSrc = (id: string) =>
+  `https://kinescope.io/embed/${encodeURIComponent(id)}?autoplay=1&muted=1&loop=1&playsinline=1&controls=0&preload=auto`;
 
 type HeroSectionProps = {
   /** First headline line */
@@ -17,6 +17,8 @@ type HeroSectionProps = {
   ctaNote?: ReactNode;
   ctaLabel?: string;
   ctaHref?: string;
+  /** Kinescope video ID for the background */
+  videoId?: string;
   className?: string;
 };
 
@@ -28,6 +30,7 @@ export default function HeroSection({
   ctaNote = "A brief note that sits next to the button.",
   ctaLabel = "Get started",
   ctaHref = "#",
+  videoId = "wXQXtViozUbKjC61PdWpw2",
   className = "",
 }: HeroSectionProps) {
   return (
@@ -37,7 +40,7 @@ export default function HeroSection({
       {/* Background video — like the original, sized at 120% of a 3:2 frame (180vh × 80vw), never smaller than the section */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <HeroVideo
-          src={VIDEO_SRC}
+          src={videoSrc(videoId)}
           className="absolute top-1/2 left-1/2 h-[80vw] min-h-full w-[180vh] min-w-full -translate-x-1/2 -translate-y-1/2 border-0"
         />
       </div>

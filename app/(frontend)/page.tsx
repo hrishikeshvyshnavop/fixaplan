@@ -14,6 +14,22 @@ import { WAITLIST_HASH } from "@/app/waitlist/constants";
 import config from "@payload-config";
 import { getPayload } from "payload";
 import { FAQ_DEFAULTS } from "@/globals/Faq";
+import { HERO_DEFAULTS } from "@/globals/Hero";
+
+// Hero text and video from Payload (/admin → Globals → Hero). Empty fields fall back to today's text.
+async function getHero(): Promise<typeof HERO_DEFAULTS> {
+  const payload = await getPayload({ config });
+  const saved = await payload.findGlobal({ slug: "hero" });
+  return {
+    titleTop: saved.titleTop || HERO_DEFAULTS.titleTop,
+    titleBottom: saved.titleBottom || HERO_DEFAULTS.titleBottom,
+    titleAccent: saved.titleAccent || HERO_DEFAULTS.titleAccent,
+    description: saved.description || HERO_DEFAULTS.description,
+    ctaNote: saved.ctaNote || HERO_DEFAULTS.ctaNote,
+    ctaLabel: saved.ctaLabel || HERO_DEFAULTS.ctaLabel,
+    videoId: saved.videoId || HERO_DEFAULTS.videoId,
+  };
+}
 
 // FAQ text from Payload (edited at /admin → Globals → FAQ). Until it's saved there, or if an
 // entry is left empty, today's text is used.
@@ -66,7 +82,7 @@ function jsonLd(faq: typeof FAQ_DEFAULTS) {
 }
 
 export default async function Home() {
-  const faq = await getFaq();
+  const [hero, faq] = await Promise.all([getHero(), getFaq()]);
 
   return (
     <>
@@ -84,13 +100,14 @@ export default async function Home() {
       {/* Same flex column as <body>, so the sections' overlapping negative margins behave as before */}
       <main className="flex w-full flex-col">
         <HeroSection
-          titleTop="Plan your day"
-          titleBottom="without"
-          titleAccent="overwhelm"
-          description="Fixa is a simple, ADHD-friendly planner that turns your thoughts into a clear plan"
-          ctaNote="No clutter. No complicated setup. Just your day, clearly planned."
-          ctaLabel="Join the waitlist"
+          titleTop={hero.titleTop}
+          titleBottom={hero.titleBottom}
+          titleAccent={hero.titleAccent}
+          description={hero.description}
+          ctaNote={hero.ctaNote}
+          ctaLabel={hero.ctaLabel}
           ctaHref={WAITLIST_HASH}
+          videoId={hero.videoId}
         />
         <AdhdSection
           label="ADHD-Friendly"

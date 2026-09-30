@@ -10,6 +10,7 @@ import { Media } from "./collections/Media";
 import { Users } from "./collections/Users";
 import { Waitlist } from "./collections/Waitlist";
 import { Faq } from "./globals/Faq";
+import { Hero } from "./globals/Hero";
 import { migrations } from "./migrations";
 
 const filename = fileURLToPath(import.meta.url);
@@ -24,7 +25,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Waitlist, Media],
-  globals: [Faq],
+  globals: [Hero, Faq],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: {

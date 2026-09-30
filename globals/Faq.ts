@@ -1,5 +1,5 @@
-import { revalidatePath } from "next/cache";
 import type { GlobalConfig } from "payload";
+import { revalidateHome } from "./revalidateHome";
 
 // Today's copy, matching the original site. Used as the admin defaults and as the page's
 // fallback until the global has been saved once.
@@ -47,16 +47,7 @@ export const Faq: GlobalConfig = {
     update: ({ req }) => Boolean(req.user),
   },
   hooks: {
-    // The homepage is static; rebuild it on the next visit so edits show straight away
-    afterChange: [
-      () => {
-        try {
-          revalidatePath("/");
-        } catch {
-          // Not inside a Next.js request (e.g. the Payload CLI); nothing to refresh
-        }
-      },
-    ],
+    afterChange: [revalidateHome],
   },
   fields: [
     {
