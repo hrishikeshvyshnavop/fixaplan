@@ -17,22 +17,26 @@ import { draftMode } from "next/headers";
 import { getPayload } from "payload";
 import { FAQ_DEFAULTS } from "@/globals/Faq";
 import { HERO_DEFAULTS } from "@/globals/Hero";
+import { parseVideoLink } from "@/globals/videoLink";
 
 // Hero text and background from Payload (/admin → Globals → Hero). Empty fields fall back to
-// today's text and Kinescope video. `draft` (Live Preview only) reads the latest autosave.
+// today's text and video. `draft` (Live Preview only) reads the latest autosave.
 async function getHero(draft: boolean) {
   const payload = await getPayload({ config });
   const saved = await payload.findGlobal({ slug: "hero", draft, depth: 1 });
   const url = (file: typeof saved.backgroundImage) => (typeof file === "object" && file?.url) || null;
   const imageUrl = url(saved.backgroundImage);
   const videoUrl = url(saved.backgroundVideo);
-  // Image if chosen and uploaded; otherwise the uploaded video file, else the Kinescope video
+  // The pasted link, or today's video if it's empty or (an old draft) not a link we can play
+  const link =
+    (saved.videoUrl && parseVideoLink(saved.videoUrl)) || parseVideoLink(HERO_DEFAULTS.videoUrl)!;
+  // Image if chosen and uploaded; otherwise the uploaded video file, else the video link
   const background: HeroBackground =
     saved.backgroundType === "image" && imageUrl
       ? { type: "image", src: imageUrl }
       : saved.backgroundType !== "image" && videoUrl
         ? { type: "video", src: videoUrl }
-        : { type: "kinescope", id: saved.videoId || HERO_DEFAULTS.videoId };
+        : { type: link.kind === "file" ? "video" : "embed", src: link.src };
   return {
     background,
     titleTop: saved.titleTop || HERO_DEFAULTS.titleTop,
@@ -46,7 +50,7 @@ async function getHero(draft: boolean) {
 
 // FAQ text from Payload (edited at /admin → Globals → FAQ). Until it's saved there, or if an
 // entry is left empty, today's text is used.
-async function getFaq(draft: boolean): Promise<typeof FAQ_DEFAULTS> {
+async function getFaq(draft: boolean) {
   const payload = await getPayload({ config });
   const saved = await payload.findGlobal({ slug: "faq", depth: 1, draft });
   return {
@@ -56,7 +60,7 @@ async function getFaq(draft: boolean): Promise<typeof FAQ_DEFAULTS> {
     introEnd: saved.introEnd ?? FAQ_DEFAULTS.introEnd,
     chipImage: (typeof saved.chipImage === "object" && saved.chipImage?.url) || FAQ_DEFAULTS.chipImage,
     items: saved.items?.length
-      ? saved.items.map(({ question, answer }) => ({ question, answer }))
+      ? saved.items.map(({ id, question, answer }) => ({ id, question, answer }))
       : FAQ_DEFAULTS.items,
   };
 }

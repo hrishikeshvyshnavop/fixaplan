@@ -381,13 +381,13 @@ export interface Hero {
   ctaLabel: string;
   backgroundType: 'video' | 'image';
   /**
-   * Upload an MP4 or WebM from your computer (up to 50 MB; keep it short and muted). Leave empty to use the Kinescope video below.
+   * Upload an MP4 or WebM from your computer (up to 50 MB; keep it short and muted). Leave empty to use the video link below.
    */
   backgroundVideo?: (number | null) | Media;
   /**
-   * Used when no video file is uploaded. The ID from the Kinescope link, e.g. kinescope.io/wXQXtViozUbKjC61PdWpw2
+   * Used when no video file is uploaded. A YouTube, Vimeo or Kinescope link, or a direct link to an .mp4/.webm file. It plays muted and on a loop.
    */
-  videoId?: string | null;
+  videoUrl?: string | null;
   /**
    * Upload from your computer. Landscape, at least 1920px wide; it's cropped to fill the screen.
    */
@@ -437,7 +437,7 @@ export interface HeroSelect<T extends boolean = true> {
   ctaLabel?: T;
   backgroundType?: T;
   backgroundVideo?: T;
-  videoId?: T;
+  videoUrl?: T;
   backgroundImage?: T;
   _status?: T;
   updatedAt?: T;

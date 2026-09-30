@@ -3,12 +3,11 @@ import type { ReactNode } from "react";
 import Button from "@/app/components/Button";
 import HeroVideo from "@/app/components/HeroVideo";
 
-const videoSrc = (id: string) =>
-  `https://kinescope.io/embed/${encodeURIComponent(id)}?autoplay=1&muted=1&loop=1&playsinline=1&controls=0&preload=auto`;
-
 /** What fills the hero behind the text */
 export type HeroBackground =
-  | { type: "kinescope"; id: string }
+  /** Player page (YouTube, Vimeo, Kinescope) in an iframe */
+  | { type: "embed"; src: string }
+  /** Video file, uploaded or linked */
   | { type: "video"; src: string }
   | { type: "image"; src: string };
 
@@ -36,22 +35,27 @@ export default function HeroSection({
   ctaNote = "A brief note that sits next to the button.",
   ctaLabel = "Get started",
   ctaHref = "#",
-  background = { type: "kinescope", id: "wXQXtViozUbKjC61PdWpw2" },
+  background = {
+    type: "embed",
+    src: "https://kinescope.io/embed/wXQXtViozUbKjC61PdWpw2?autoplay=1&muted=1&loop=1&playsinline=1&controls=0&preload=auto",
+  },
   className = "",
 }: HeroSectionProps) {
   return (
     <section
       className={`relative isolate z-[2] flex h-screen w-full flex-col items-center justify-end overflow-hidden bg-black px-4 pb-[100px] md:h-[106vh] md:px-0 ${className}`}
     >
+      {/* Start connecting to the video host before the player loads (React moves this into <head>) */}
+      {background.type !== "image" && <link rel="preconnect" href={new URL(background.src).origin} />}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        {background.type === "kinescope" && (
+        {background.type === "embed" && (
           // Like the original: the player sized at 120% of a 3:2 frame (180vh × 80vw), never smaller than the section
           <HeroVideo
-            src={videoSrc(background.id)}
+            src={background.src}
             className="absolute top-1/2 left-1/2 h-[80vw] min-h-full w-[180vh] min-w-full -translate-x-1/2 -translate-y-1/2 border-0"
           />
         )}
-        {/* Uploaded in Payload: cropped to fill the section */}
+        {/* Video or image file: cropped to fill the section */}
         {background.type === "video" && (
           <HeroVideo src={background.src} kind="file" className="absolute inset-0 size-full object-cover" />
         )}

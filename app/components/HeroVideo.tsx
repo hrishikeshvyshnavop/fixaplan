@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 
 type HeroVideoProps = {
   src: string;
-  /** Kinescope player page (iframe) or an uploaded video file */
+  /** Player page (YouTube, Vimeo, Kinescope) in an iframe, or a video file */
   kind?: "iframe" | "file";
   className?: string;
 };
 
 /**
- * Background video that only starts loading once the page itself has loaded. The Kinescope
- * player (and its own font), or a large video file, otherwise competes with the page's CSS, fonts
+ * Background video that only starts loading once the page itself has loaded. The video player
+ * (and its own fonts and scripts), or a large video file, otherwise competes with the page's CSS, fonts
  * and images; it can't be seen until the intro panel clears at ~2.9s anyway.
  */
 export default function HeroVideo({ src, kind = "iframe", className = "" }: HeroVideoProps) {

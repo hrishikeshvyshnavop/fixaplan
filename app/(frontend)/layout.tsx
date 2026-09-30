@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif } from "next/font/google";
 import localFont from "next/font/local";
-import { preconnect } from "react-dom";
 import SmoothScroll from "@/app/components/SmoothScroll";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/app/site";
 import "./globals.css";
@@ -54,9 +53,6 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
-  // Start connecting to the hero video host before the iframe is parsed
-  preconnect("https://kinescope.io");
-
   return (
     <html
       lang="en"

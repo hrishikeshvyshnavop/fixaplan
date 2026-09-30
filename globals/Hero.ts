@@ -1,5 +1,6 @@
 import type { GlobalConfig } from "payload";
 import { revalidateHome } from "./revalidateHome";
+import { parseVideoLink } from "./videoLink";
 
 // Today's copy, matching the original site. Used as the admin defaults and as the page's
 // fallback until the global has been saved once.
@@ -11,7 +12,7 @@ export const HERO_DEFAULTS = {
   ctaNote: "No clutter. No complicated setup. Just your day, clearly planned.",
   ctaLabel: "Join the waitlist",
   backgroundType: "video" as "video" | "image",
-  videoId: "wXQXtViozUbKjC61PdWpw2",
+  videoUrl: "https://kinescope.io/wXQXtViozUbKjC61PdWpw2",
 };
 
 // Hero section text and background video. Anyone can read it (the page does); only admins can change it.
@@ -111,21 +112,24 @@ export const Hero: GlobalConfig = {
           admin: {
             condition: (data) => data?.backgroundType !== "image",
             description:
-              "Upload an MP4 or WebM from your computer (up to 50 MB; keep it short and muted). Leave empty to use the Kinescope video below.",
+              "Upload an MP4 or WebM from your computer (up to 50 MB; keep it short and muted). Leave empty to use the video link below.",
           },
         },
         {
-          name: "videoId",
-          label: "Kinescope video ID",
+          name: "videoUrl",
+          label: "Video link",
           type: "text",
-          defaultValue: HERO_DEFAULTS.videoId,
+          defaultValue: HERO_DEFAULTS.videoUrl,
           admin: {
             condition: (data) => data?.backgroundType !== "image" && !data?.backgroundVideo,
-            description: "Used when no video file is uploaded. The ID from the Kinescope link, e.g. kinescope.io/wXQXtViozUbKjC61PdWpw2",
+            description:
+              "Used when no video file is uploaded. A YouTube, Vimeo or Kinescope link, or a direct link to an .mp4/.webm file. It plays muted and on a loop.",
           },
-          // It goes into the embed URL, so only letters and digits
+          // Only links we know how to play as a background
           validate: (value: string | null | undefined) =>
-            !value || /^[A-Za-z0-9]+$/.test(value) || "Letters and digits only (just the ID, not the whole link)",
+            !value ||
+            Boolean(parseVideoLink(value)) ||
+            "Paste a YouTube, Vimeo or Kinescope link, or a direct https link to an .mp4 or .webm file",
         },
         {
           name: "backgroundImage",

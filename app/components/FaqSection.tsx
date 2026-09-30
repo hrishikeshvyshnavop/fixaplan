@@ -5,6 +5,8 @@ import { motion, useScroll, useTransform, type Transition, type Variants } from 
 import WordChip from "@/app/components/WordChip";
 
 export type FaqItem = {
+  /** Payload's row id; questions can repeat (e.g. mid-edit in Live Preview), so it's the key */
+  id?: string | null;
   question: string;
   answer: string;
 };
@@ -203,7 +205,7 @@ export default function FaqSection({
 
         <div className="flex w-full max-w-[670px] flex-col items-center gap-3">
           {items.map((item, i) => (
-            <Question key={item.question} item={item} index={i} phone={phone} defaultOpen={i === 0} />
+            <Question key={item.id ?? i} item={item} index={i} phone={phone} defaultOpen={i === 0} />
           ))}
         </div>
       </motion.section>

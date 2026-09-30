@@ -32,8 +32,9 @@ Versions: `payload` / `@payloadcms/*` 3.90.2 on Next 16.3.5 (Payload supports Ne
 | `payload.config.ts` | Payload config: collections, globals, Postgres adapter, secret, migrations |
 | `collections/Users.ts` | Admin accounts (email + password) |
 | `collections/Waitlist.ts` | Signups: `email` (unique), `name`, automatic `createdAt` |
-| `collections/Media.ts` | Uploaded images. Files go to the public Supabase Storage bucket `media` (S3 API, `@payloadcms/storage-s3`); the page links to their public URL and `next/image` resizes them |
-| `globals/Hero.ts` | Hero text (headline, description, button, note) and the Kinescope video ID. Defaults are today's copy; publishing refreshes `/` |
+| `collections/Media.ts` | Uploaded images and videos (MP4/WebM, up to 50 MB; the browser uploads straight to the bucket). Files go to the public Supabase Storage bucket `media` (S3 API, `@payloadcms/storage-s3`); the page links to their public URL and `next/image` resizes them |
+| `globals/Hero.ts` | Hero text (headline, description, button, note) and background (uploaded video or image, or a video link). Defaults are today's copy; publishing refreshes `/` |
+| `globals/videoLink.ts` | `parseVideoLink()`: turns a YouTube, Vimeo, Kinescope or direct `.mp4`/`.webm` link into a muted looping background player; used by the admin check and the page |
 | `globals/Faq.ts` | FAQ text (intro, email chip, questions). Defaults are today's copy; publishing refreshes `/` |
 | `globals/revalidateHome.ts` | Shared `afterChange` hook: refreshes `/` on publish, skips draft autosaves |
 | `app/(frontend)/preview/` | Live Preview: `/preview` turns on draft mode for logged-in admins, `/preview/exit` turns it off |
@@ -63,7 +64,14 @@ returns 403). Only logged-in admins can see them in `/admin`, where they can be 
 ## Editing the Hero
 
 - `/admin` → **Globals** → **Hero**: the two headline lines, the italic accent word, the
-  description, the note next to the button, the button text and the background video's Kinescope ID.
+  description, the note next to the button, the button text and the **Background**.
+- **Background:** Type **Image** shows an uploaded image. Type **Video** plays an uploaded file if
+  there is one, otherwise the **Video link**: a YouTube, Vimeo or Kinescope link, or a direct https
+  link to an `.mp4`/`.webm` file. Other links are rejected, because the page can't make them play
+  muted on a loop without controls. The default link is today's Kinescope video.
+- The database still has the old `video_id` columns (`hero`, `_hero_v`) from the Kinescope-ID field.
+  They're unused and were kept so the previous deploy kept working. Drop them by hand once every
+  deploy runs the video-link code.
 - Read with `payload.findGlobal({ slug: "hero" })` in `app/(frontend)/page.tsx`; empty fields fall
   back to `HERO_DEFAULTS` in `globals/Hero.ts`.
 
