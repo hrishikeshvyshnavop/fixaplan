@@ -56,6 +56,9 @@ export default buildConfig({
     // Uploads go to the public Supabase Storage bucket over its S3 API, and the page links
     // straight to the bucket's public URL (no round trip through Payload)
     s3Storage({
+      // The browser uploads straight to the bucket (signed URL), so videos aren't stopped by Vercel's
+      // 4.5 MB request limit. Only logged-in admins get a signed URL.
+      clientUploads: true,
       collections: {
         media: {
           disablePayloadAccessControl: true,

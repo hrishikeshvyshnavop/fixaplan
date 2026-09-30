@@ -4,7 +4,7 @@ import FeaturesSection from "@/app/components/FeaturesSection";
 import FixaAiSection from "@/app/components/FixaAiSection";
 import Footer from "@/app/components/Footer";
 import FixedBackdrop from "@/app/components/FixedBackdrop";
-import HeroSection from "@/app/components/HeroSection";
+import HeroSection, { type HeroBackground } from "@/app/components/HeroSection";
 import LivePreviewBar from "@/app/components/LivePreviewBar";
 import Header from "@/app/components/Header";
 import Intro from "@/app/components/Intro";
@@ -18,19 +18,29 @@ import { getPayload } from "payload";
 import { FAQ_DEFAULTS } from "@/globals/Faq";
 import { HERO_DEFAULTS } from "@/globals/Hero";
 
-// Hero text and video from Payload (/admin → Globals → Hero). Empty fields fall back to today's text.
-// `draft` (Live Preview only) reads the latest autosave instead of the published text.
-async function getHero(draft: boolean): Promise<typeof HERO_DEFAULTS> {
+// Hero text and background from Payload (/admin → Globals → Hero). Empty fields fall back to
+// today's text and Kinescope video. `draft` (Live Preview only) reads the latest autosave.
+async function getHero(draft: boolean) {
   const payload = await getPayload({ config });
-  const saved = await payload.findGlobal({ slug: "hero", draft });
+  const saved = await payload.findGlobal({ slug: "hero", draft, depth: 1 });
+  const url = (file: typeof saved.backgroundImage) => (typeof file === "object" && file?.url) || null;
+  const imageUrl = url(saved.backgroundImage);
+  const videoUrl = url(saved.backgroundVideo);
+  // Image if chosen and uploaded; otherwise the uploaded video file, else the Kinescope video
+  const background: HeroBackground =
+    saved.backgroundType === "image" && imageUrl
+      ? { type: "image", src: imageUrl }
+      : saved.backgroundType !== "image" && videoUrl
+        ? { type: "video", src: videoUrl }
+        : { type: "kinescope", id: saved.videoId || HERO_DEFAULTS.videoId };
   return {
+    background,
     titleTop: saved.titleTop || HERO_DEFAULTS.titleTop,
     titleBottom: saved.titleBottom || HERO_DEFAULTS.titleBottom,
     titleAccent: saved.titleAccent || HERO_DEFAULTS.titleAccent,
     description: saved.description || HERO_DEFAULTS.description,
     ctaNote: saved.ctaNote || HERO_DEFAULTS.ctaNote,
     ctaLabel: saved.ctaLabel || HERO_DEFAULTS.ctaLabel,
-    videoId: saved.videoId || HERO_DEFAULTS.videoId,
   };
 }
 
@@ -112,7 +122,7 @@ export default async function Home() {
           ctaNote={hero.ctaNote}
           ctaLabel={hero.ctaLabel}
           ctaHref={WAITLIST_HASH}
-          videoId={hero.videoId}
+          background={hero.background}
         />
         <AdhdSection
           label="ADHD-Friendly"

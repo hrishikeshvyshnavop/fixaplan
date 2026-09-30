@@ -10,11 +10,12 @@ function refreshHome() {
   }
 }
 
-// Uploaded pictures (e.g. the FAQ chip's hover image). Files live in the public Supabase
-// Storage bucket `media` (see the s3Storage plugin in payload.config.ts); next/image resizes them.
+// Uploaded pictures and videos (e.g. the FAQ chip's hover image, the hero background). Files live in
+// the public Supabase Storage bucket `media` (see the s3Storage plugin in payload.config.ts), which
+// takes up to 50 MB per file; next/image resizes the pictures.
 export const Media: CollectionConfig = {
   slug: "media",
-  labels: { singular: "Image", plural: "Media" },
+  labels: { singular: "File", plural: "Media" },
   access: {
     read: () => true,
   },
@@ -23,13 +24,22 @@ export const Media: CollectionConfig = {
     afterDelete: [refreshHome],
   },
   upload: {
-    mimeTypes: ["image/png", "image/jpeg", "image/webp", "image/avif", "image/gif"],
+    // The bucket's allowed types must match (Supabase → Storage → media → Edit bucket)
+    mimeTypes: [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/avif",
+      "image/gif",
+      "video/mp4",
+      "video/webm",
+    ],
   },
   fields: [
     {
       name: "alt",
       type: "text",
-      admin: { description: "Describes the picture for screen readers. Leave empty if it's only decoration." },
+      admin: { description: "Describes the picture for screen readers. Leave empty if it's only decoration (or a video)." },
     },
   ],
 };

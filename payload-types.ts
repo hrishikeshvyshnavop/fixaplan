@@ -169,7 +169,7 @@ export interface Waitlist {
 export interface Media {
   id: number;
   /**
-   * Describes the picture for screen readers. Leave empty if it's only decoration.
+   * Describes the picture for screen readers. Leave empty if it's only decoration (or a video).
    */
   alt?: string | null;
   _objectKey?: string | null;
@@ -379,10 +379,19 @@ export interface Hero {
    * The button always opens the waitlist
    */
   ctaLabel: string;
+  backgroundType: 'video' | 'image';
   /**
-   * The ID from the Kinescope link, e.g. kinescope.io/wXQXtViozUbKjC61PdWpw2
+   * Upload an MP4 or WebM from your computer (up to 50 MB; keep it short and muted). Leave empty to use the Kinescope video below.
    */
-  videoId: string;
+  backgroundVideo?: (number | null) | Media;
+  /**
+   * Used when no video file is uploaded. The ID from the Kinescope link, e.g. kinescope.io/wXQXtViozUbKjC61PdWpw2
+   */
+  videoId?: string | null;
+  /**
+   * Upload from your computer. Landscape, at least 1920px wide; it's cropped to fill the screen.
+   */
+  backgroundImage?: (number | null) | Media;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -426,7 +435,10 @@ export interface HeroSelect<T extends boolean = true> {
   description?: T;
   ctaNote?: T;
   ctaLabel?: T;
+  backgroundType?: T;
+  backgroundVideo?: T;
   videoId?: T;
+  backgroundImage?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;

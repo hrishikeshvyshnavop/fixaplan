@@ -10,6 +10,7 @@ export const HERO_DEFAULTS = {
   description: "Fixa is a simple, ADHD-friendly planner that turns your thoughts into a clear plan",
   ctaNote: "No clutter. No complicated setup. Just your day, clearly planned.",
   ctaLabel: "Join the waitlist",
+  backgroundType: "video" as "video" | "image",
   videoId: "wXQXtViozUbKjC61PdWpw2",
 };
 
@@ -86,15 +87,61 @@ export const Hero: GlobalConfig = {
       ],
     },
     {
-      name: "videoId",
-      label: "Background video (Kinescope ID)",
-      type: "text",
-      required: true,
-      defaultValue: HERO_DEFAULTS.videoId,
-      admin: { description: "The ID from the Kinescope link, e.g. kinescope.io/wXQXtViozUbKjC61PdWpw2" },
-      // It goes into the embed URL, so only letters and digits
-      validate: (value: string | null | undefined) =>
-        !value || /^[A-Za-z0-9]+$/.test(value) || "Letters and digits only (just the ID, not the whole link)",
+      type: "collapsible",
+      label: "Background",
+      fields: [
+        {
+          name: "backgroundType",
+          label: "Type",
+          type: "radio",
+          required: true,
+          defaultValue: HERO_DEFAULTS.backgroundType,
+          options: [
+            { label: "Video", value: "video" },
+            { label: "Image", value: "image" },
+          ],
+          admin: { layout: "horizontal" },
+        },
+        {
+          name: "backgroundVideo",
+          label: "Video file",
+          type: "upload",
+          relationTo: "media",
+          filterOptions: { mimeType: { contains: "video/" } },
+          admin: {
+            condition: (data) => data?.backgroundType !== "image",
+            description:
+              "Upload an MP4 or WebM from your computer (up to 50 MB; keep it short and muted). Leave empty to use the Kinescope video below.",
+          },
+        },
+        {
+          name: "videoId",
+          label: "Kinescope video ID",
+          type: "text",
+          defaultValue: HERO_DEFAULTS.videoId,
+          admin: {
+            condition: (data) => data?.backgroundType !== "image" && !data?.backgroundVideo,
+            description: "Used when no video file is uploaded. The ID from the Kinescope link, e.g. kinescope.io/wXQXtViozUbKjC61PdWpw2",
+          },
+          // It goes into the embed URL, so only letters and digits
+          validate: (value: string | null | undefined) =>
+            !value || /^[A-Za-z0-9]+$/.test(value) || "Letters and digits only (just the ID, not the whole link)",
+        },
+        {
+          name: "backgroundImage",
+          label: "Image",
+          type: "upload",
+          relationTo: "media",
+          filterOptions: { mimeType: { contains: "image/" } },
+          admin: {
+            condition: (data) => data?.backgroundType === "image",
+            description: "Upload from your computer. Landscape, at least 1920px wide; it's cropped to fill the screen.",
+          },
+          // Needed only when the type is Image (draft autosaves skip validation)
+          validate: (value: unknown, { siblingData }: { siblingData: { backgroundType?: string } }) =>
+            Boolean(value) || siblingData.backgroundType !== "image" || "Choose an image, or switch the type to Video",
+        },
+      ],
     },
   ],
 };
